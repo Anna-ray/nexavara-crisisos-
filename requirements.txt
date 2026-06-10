@@ -1,0 +1,9 @@
+requests
+pydantic
+python-dotenv
+flake8
+pytest
+flask
+flask-socketio
+flask-cors
+psutil

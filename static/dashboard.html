@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXAVARA CrisisOS - AI-Powered Crisis Intelligence Platform</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="8" class="node-center"/>
+                        <circle cx="30" cy="25" r="5" class="node"/>
+                        <circle cx="70" cy="25" r="5" class="node"/>
+                        <circle cx="85" cy="50" r="5" class="node"/>
+                        <circle cx="70" cy="75" r="5" class="node"/>
+                        <circle cx="30" cy="75" r="5" class="node"/>
+                        <circle cx="15" cy="50" r="5" class="node"/>
+                        <line x1="50" y1="50" x2="30" y2="25" class="connection"/>
+                        <line x1="50" y1="50" x2="70" y2="25" class="connection"/>
+                        <line x1="50" y1="50" x2="85" y2="50" class="connection"/>
+                        <line x1="50" y1="50" x2="70" y2="75" class="connection"/>
+                        <line x1="50" y1="50" x2="30" y2="75" class="connection"/>
+                        <line x1="50" y1="50" x2="15" y2="50" class="connection"/>
+                        <path d="M 60 20 L 90 10 L 85 35 Z" class="arrow"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>NEXAVARA <span class="crisis-os">CrisisOS</span></h1>
+                    <p class="subtitle">AI-Powered Crisis Intelligence Platform</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <div class="status-indicator">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span class="status-text" id="statusText">READY</span>
+                </div>
+                <div class="timestamp" id="headerTimestamp">--:--:--</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard-main">
+        <!-- Executive Summary Hero -->
+        <div class="executive-hero">
+            <div class="hero-left">
+                <div class="incident-title" id="incidentTitle">Post-Quantum Cryptographic Failure</div>
+                <div class="incident-subtitle" id="incidentSubtitle">Awaiting incident detection...</div>
+            </div>
+            <div class="hero-right">
+                <div class="financial-exposure">
+                    <div class="exposure-label">ESTIMATED EXPOSURE</div>
+                    <div class="exposure-amount" id="exposureAmount">$0</div>
+                    <div class="exposure-sublabel">Total Financial Impact</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics Row -->
+        <div class="metrics-row">
+            <div class="metric-card severity-card">
+                <div class="metric-icon">🚨</div>
+                <div class="metric-content">
+                    <div class="metric-label">Severity</div>
+                    <div class="metric-value severity-value" id="severityValue">--</div>
+                </div>
+            </div>
+            <div class="metric-card confidence-card">
+                <div class="metric-icon">📊</div>
+                <div class="metric-content">
+                    <div class="metric-label">Confidence</div>
+                    <div class="metric-value" id="confidenceValue">--%</div>
+                </div>
+            </div>
+            <div class="metric-card regulatory-card">
+                <div class="metric-icon">⚖️</div>
+                <div class="metric-content">
+                    <div class="metric-label">Regulatory Risk</div>
+                    <div class="metric-value" id="regulatoryValue">--</div>
+                </div>
+            </div>
+            <div class="metric-card systems-card">
+                <div class="metric-icon">🖥️</div>
+                <div class="metric-content">
+                    <div class="metric-label">Affected Systems</div>
+                    <div class="metric-value" id="systemsValue">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="dashboard-grid">
+            <!-- Crisis Timeline -->
+            <div class="card timeline-card">
+                <div class="card-header">
+                    <h2>⏱️ CRISIS TIMELINE</h2>
+                    <span class="status-badge" id="timelineStatus">MONITORING</span>
+                </div>
+                <div class="card-body">
+                    <div class="timeline-container" id="timelineContainer">
+                        <div class="placeholder">Waiting for incident detection...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Impact -->
+            <div class="card impact-card">
+                <div class="card-header">
+                    <h2>💰 BUSINESS IMPACT</h2>
+                    <span class="status-badge" id="impactStatus">PENDING</span>
+                </div>
+                <div class="card-body">
+                    <div class="impact-grid">
+                        <div class="impact-item">
+                            <div class="impact-label">Financial Loss/Min</div>
+                            <div class="impact-value financial" id="lossPerMinute">$0</div>
+                        </div>
+                        <div class="impact-item">
+                            <div class="impact-label">Transactions Blocked</div>
+                            <div class="impact-value" id="transactionsBlocked">0/hour</div>
+                        </div>
+                        <div class="impact-item">
+                            <div class="impact-label">Customers Affected</div>
+                            <div class="impact-value" id="customersAffected">0</div>
+                        </div>
+                        <div class="impact-item">
+                            <div class="impact-label">Downtime Estimate</div>
+                            <div class="impact-value" id="downtimeEstimate">0 min</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommended Actions -->
+            <div class="card actions-card">
+                <div class="card-header">
+                    <h2>✅ RECOMMENDED ACTIONS</h2>
+                    <span class="priority-badge" id="actionsPriority">P0</span>
+                </div>
+                <div class="card-body">
+                    <div class="actions-list" id="actionsList">
+                        <div class="placeholder">Awaiting analysis completion...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="card status-card">
+                <div class="card-header">
+                    <h2>🔍 SYSTEM STATUS</h2>
+                    <span class="status-badge active" id="systemStatus">OPERATIONAL</span>
+                </div>
+                <div class="card-body">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-icon">⚡</div>
+                            <div class="status-info">
+                                <div class="status-label">Response Time</div>
+                                <div class="status-value" id="responseTime">0.0s</div>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-icon">🤖</div>
+                            <div class="status-info">
+                                <div class="status-label">AI Agents</div>
+                                <div class="status-value" id="agentsActive">0/4</div>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-icon">📨</div>
+                            <div class="status-info">
+                                <div class="status-label">Messages</div>
+                                <div class="status-value" id="messagesProcessed">0</div>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-icon">✅</div>
+                            <div class="status-info">
+                                <div class="status-label">Audit Trail</div>
+                                <div class="status-value" id="auditRecords">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Executive Report Preview -->
+            <div class="card report-card">
+                <div class="card-header">
+                    <h2>📋 EXECUTIVE BRIEFING</h2>
+                    <button class="btn-icon" id="downloadReport" title="Download Report">💾</button>
+                </div>
+                <div class="card-body">
+                    <div class="report-preview" id="reportPreview">
+                        <div class="placeholder">Executive report will be generated after analysis...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compliance & Audit -->
+            <div class="card audit-card">
+                <div class="card-header">
+                    <h2>📝 COMPLIANCE & AUDIT</h2>
+                    <div class="audit-controls">
+                        <span class="record-count" id="recordCount">0 records</span>
+                        <button class="btn-icon" id="refreshAudit" title="Refresh">🔄</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="audit-log" id="auditLog">
+                        <div class="placeholder">No audit records yet...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <button class="btn-primary" id="startWorkflow">
+                <span class="btn-icon">▶️</span>
+                <span class="btn-text">Start Crisis Simulation</span>
+            </button>
+            <button class="btn-secondary" id="resetDashboard">
+                <span class="btn-icon">🔄</span>
+                <span class="btn-text">Reset</span>
+            </button>
+            <div class="connection-status">
+                <span class="connection-dot" id="connectionDot"></span>
+                <span id="connectionText">Connecting...</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Initializing CrisisOS...</div>
+    </div>
+
+    <script src="/static/dashboard.js"></script>
+</body>
+</html>
