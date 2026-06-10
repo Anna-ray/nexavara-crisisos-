@@ -1,0 +1,142 @@
+[
+  {
+    "memory_id": "d661a128dc7126c8",
+    "stored_at": "2026-06-10T16:31:44.277619+00:00",
+    "incident_id": "INC-001",
+    "description": "HSM entropy degradation detected in production",
+    "severity": "critical",
+    "resolution_time": 1800,
+    "agents_involved": [
+      "PQCAnalysisAgent",
+      "PQCCoordinationAgent"
+    ],
+    "outcome": "resolved",
+    "lessons_learned": [
+      "Monitor HSM entropy levels proactively",
+      "Implement automatic failover to backup HSM"
+    ],
+    "raw_data": {
+      "incident_id": "INC-001",
+      "description": "HSM entropy degradation detected in production",
+      "severity": "critical",
+      "outcome": "resolved",
+      "resolution_time": 1800,
+      "agents_involved": [
+        "PQCAnalysisAgent",
+        "PQCCoordinationAgent"
+      ],
+      "lessons_learned": [
+        "Monitor HSM entropy levels proactively",
+        "Implement automatic failover to backup HSM"
+      ]
+    }
+  },
+  {
+    "memory_id": "4e2f40b4b212a00e",
+    "stored_at": "2026-06-10T16:31:44.280118+00:00",
+    "incident_id": "INC-002",
+    "description": "Post-quantum handshake failures in gateway",
+    "severity": "high",
+    "resolution_time": 3600,
+    "agents_involved": [
+      "PQCAnalysisAgent",
+      "PQCDecisionAgent"
+    ],
+    "outcome": "resolved",
+    "lessons_learned": [
+      "Update Kyber-1024 implementation",
+      "Increase handshake timeout values"
+    ],
+    "raw_data": {
+      "incident_id": "INC-002",
+      "description": "Post-quantum handshake failures in gateway",
+      "severity": "high",
+      "outcome": "resolved",
+      "resolution_time": 3600,
+      "agents_involved": [
+        "PQCAnalysisAgent",
+        "PQCDecisionAgent"
+      ],
+      "lessons_learned": [
+        "Update Kyber-1024 implementation",
+        "Increase handshake timeout values"
+      ]
+    }
+  },
+  {
+    "memory_id": "39a89c3e2643445d",
+    "stored_at": "2026-06-10T16:31:44.282931+00:00",
+    "incident_id": "INC-003",
+    "description": "Cross-border clearing latency spike",
+    "severity": "medium",
+    "resolution_time": 900,
+    "agents_involved": [
+      "PQCCoordinationAgent"
+    ],
+    "outcome": "resolved",
+    "lessons_learned": [
+      "Optimize network routing for cross-border traffic"
+    ],
+    "raw_data": {
+      "incident_id": "INC-003",
+      "description": "Cross-border clearing latency spike",
+      "severity": "medium",
+      "outcome": "resolved",
+      "resolution_time": 900,
+      "agents_involved": [
+        "PQCCoordinationAgent"
+      ],
+      "lessons_learned": [
+        "Optimize network routing for cross-border traffic"
+      ]
+    }
+  },
+  {
+    "memory_id": "a53f63f498056a3c",
+    "stored_at": "2026-06-10T16:31:52.869081+00:00",
+    "incident_id": "PQC-FLASH-CRASH-2026",
+    "description": "CRITICAL: HSM entropy degradation detected. Kyber-1024 key-generation latency spiked to 847ms (normal: 12ms). Cross-border clearing gateway experiencing 94% handshake failures. Estimated financial exposure: $120,000/minute.",
+    "severity": "critical",
+    "resolution_time": null,
+    "agents_involved": [
+      "PQCCoordinationAgent"
+    ],
+    "outcome": "unknown",
+    "lessons_learned": [],
+    "raw_data": {
+      "incident_id": "PQC-FLASH-CRASH-2026",
+      "description": "CRITICAL: HSM entropy degradation detected. Kyber-1024 key-generation latency spiked to 847ms (normal: 12ms). Cross-border clearing gateway experiencing 94% handshake failures. Estimated financial exposure: $120,000/minute.",
+      "severity": "critical",
+      "agents_involved": [
+        "PQCCoordinationAgent"
+      ],
+      "crisis_room_id": "PQC-CRISIS-ROOM-HSM-01"
+    }
+  },
+  {
+    "memory_id": "b74b7409a67a1f15",
+    "stored_at": "2026-06-10T16:32:12.190119+00:00",
+    "incident_id": "PQC-COMPLEX-2026",
+    "description": "EMERGENCY: Cascading failure detected. HSM entropy pool exhausted, Kyber-1024 key generation failing, cross-border clearing gateway down, 15 financial institutions affected. Regulatory compliance at risk. Estimated impact: $2.5M/hour.",
+    "severity": "critical",
+    "resolution_time": null,
+    "agents_involved": [
+      "AnalysisAgent",
+      "CoordinationAgent",
+      "Orchestrator"
+    ],
+    "outcome": "in_progress",
+    "lessons_learned": [],
+    "raw_data": {
+      "incident_id": "PQC-COMPLEX-2026",
+      "description": "EMERGENCY: Cascading failure detected. HSM entropy pool exhausted, Kyber-1024 key generation failing, cross-border clearing gateway down, 15 financial institutions affected. Regulatory compliance at risk. Estimated impact: $2.5M/hour.",
+      "severity": "critical",
+      "agents_involved": [
+        "AnalysisAgent",
+        "CoordinationAgent",
+        "Orchestrator"
+      ],
+      "outcome": "in_progress"
+    }
+  }
+]
