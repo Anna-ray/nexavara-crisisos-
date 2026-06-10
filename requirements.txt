@@ -7,3 +7,7 @@ flask
 flask-socketio
 flask-cors
 psutil
+fastapi
+uvicorn
+httpx
+websockets
