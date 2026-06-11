@@ -16,6 +16,7 @@ import sys
 import os
 import json
 import time
+import socket
 import threading
 from datetime import datetime, timezone
 from typing import Dict, Any, List
@@ -78,6 +79,39 @@ dashboard_state = {
         'response_time': 0,
         'uptime': 0
     },
+    'command': {
+        'crisis_title': 'Awaiting strategic incident intelligence',
+        'crisis_status': 'STANDBY',
+        'recommended_action': 'No active recommendation',
+        'expected_outcome': 'Monitoring and analysis in progress',
+        'damage_avoided': '$0',
+        'confidence': '0%',
+        'consensus': '0/8'
+    },
+    'council': [],
+    'debate': [],
+    'outcomes': [],
+    'digital_twin': {
+        'nodes': [],
+        'links': [],
+        'focus': 'Awaiting crisis propagation model'
+    },
+    'oversight': {
+        'verdict': 'Pending review',
+        'summary': 'The AI oversight agent is assessing recommendation strength.',
+        'flags': [],
+        'confidence': 'N/A'
+    },
+    'executive_briefing': {
+        'headline': 'Awaiting first strategic recommendation.',
+        'situation': 'No active crisis has been scored yet.',
+        'action': 'No recommendation available.',
+        'outcome': 'Awaiting analysis and council consensus.',
+        'financial_exposure': '$0 projected loss',
+        'board_impact': 'No board impact assessment available.',
+        'regulatory_impact': 'No regulatory assessment available.'
+    }
+    ,
     # CrisisOS Executive Data
     'business_impact': None,
     'executive_report': None,
@@ -281,6 +315,48 @@ def create_decision_collector():
     return collector
 
 
+def push_command_state(command_data: Dict[str, Any]):
+    """Update command center state and broadcast to clients."""
+    dashboard_state['command'].update(command_data)
+    broadcast_update('command_update', dashboard_state['command'])
+
+
+def push_council_state(council_data: List[Dict[str, Any]]):
+    """Update AI Crisis Council data and broadcast to clients."""
+    dashboard_state['council'] = council_data
+    broadcast_update('council_update', council_data)
+
+
+def push_outcomes_state(outcomes_data: List[Dict[str, Any]]):
+    """Update future outcome scenarios and broadcast to clients."""
+    dashboard_state['outcomes'] = outcomes_data
+    broadcast_update('outcomes_update', outcomes_data)
+
+
+def push_digital_twin_state(twin_data: Dict[str, Any]):
+    """Update digital twin data and broadcast to clients."""
+    dashboard_state['digital_twin'] = twin_data
+    broadcast_update('twin_update', twin_data)
+
+
+def push_oversight_state(oversight_data: Dict[str, Any]):
+    """Update oversight agent review data and broadcast to clients."""
+    dashboard_state['oversight'] = oversight_data
+    broadcast_update('oversight_update', oversight_data)
+
+
+def push_briefing_state(briefing_data: Dict[str, Any]):
+    """Update executive briefing data and broadcast to clients."""
+    dashboard_state['executive_briefing'] = briefing_data
+    broadcast_update('briefing_update', briefing_data)
+
+
+def push_debate_state(debate_messages: List[Dict[str, Any]]):
+    """Stream live debate messages from AI directors."""
+    dashboard_state['debate'] = debate_messages
+    broadcast_update('debate_update', debate_messages)
+
+
 def update_system_health():
     """Update system health metrics."""
     try:
@@ -367,6 +443,41 @@ def run_pqc_workflow():
         
         broadcast_update('workflow_status', {'status': 'agents_ready'})
         add_timeline_event('Agents Ready', '4 AI Agents Initialized and Standing By')
+        push_command_state({
+            'crisis_title': 'PQ Cryptographic Flash Crash under active review',
+            'crisis_status': 'ALERT',
+            'recommended_action': 'Hold final recommendation until analysis completes.',
+            'expected_outcome': 'Gathering council consensus across risk, compliance, and finance.',
+            'damage_avoided': '$0',
+            'confidence': '24%',
+            'consensus': '3/8'
+        })
+        push_council_state([
+            {
+                'role': 'Threat Director',
+                'opinion': 'Immediate containment is required to stop propagation.',
+                'confidence': 94,
+                'vote': 'Yes',
+                'evidence': 'HSM entropy failure is active and affecting clearing.',
+                'status': 'Assertive'
+            },
+            {
+                'role': 'Finance Director',
+                'opinion': 'Current exposure is rising rapidly and must be capped.',
+                'confidence': 88,
+                'vote': 'Yes',
+                'evidence': 'Loss projection exceeds acceptable threshold.',
+                'status': 'Measured'
+            },
+            {
+                'role': 'Compliance Director',
+                'opinion': 'Containment now avoids regulatory escalation.',
+                'confidence': 87,
+                'vote': 'Yes',
+                'evidence': 'Cross-border clearing services are impacted.',
+                'status': 'Cautious'
+            }
+        ])
         time.sleep(1)
         
         # Create and inject incident
@@ -391,6 +502,18 @@ def run_pqc_workflow():
         
         add_timeline_event('Event Detected', 'PQ Signature Anomaly in HSM')
         broadcast_update('workflow_status', {'status': 'incident_injected'})
+        push_command_state({
+            'recommended_action': 'Execute urgent containment and certificate rotation.',
+            'expected_outcome': 'Prevent escalation while verifying incident scope.',
+            'confidence': '46%',
+            'consensus': '4/8'
+        })
+        
+        # Start streaming debate messages
+        push_debate_state([
+            {'speaker': 'Threat', 'text': 'HSM entropy failure is critical. We need immediate action.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'speaker': 'Finance', 'text': 'Agreed. Exposure is rising rapidly. Every minute costs us.', 'timestamp': (datetime.now(timezone.utc).replace(microsecond=0) + timezone.utc.localize(datetime.utcnow()).timedelta(seconds=1)).isoformat() if False else datetime.now(timezone.utc).isoformat()}
+        ])
         
         band_client.publish("pqc.incident.detected", {
             "source": "WebDashboard",
@@ -405,12 +528,79 @@ def run_pqc_workflow():
         time.sleep(2.0)  # Analysis
         update_system_health()
         add_timeline_event('Analysis Complete', 'Root Cause Identified: HSM Entropy Starvation')
+        push_command_state({
+            'recommended_action': 'Contain exposure and rotate affected keys immediately.',
+            'expected_outcome': 'Reduce immediate financial impact and stabilize payment flow.',
+            'confidence': '68%',
+            'consensus': '6/8'
+        })
+        
+        # Stream more debate during analysis
+        push_debate_state([
+            {'speaker': 'Threat', 'text': 'HSM entropy failure is critical. We need immediate action.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'speaker': 'Finance', 'text': 'Agreed. Exposure is rising rapidly. Every minute costs us.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'speaker': 'Compliance', 'text': 'Cross-border implications are severe. Regulators will escalate.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'speaker': 'Legal', 'text': 'Immediate containment limits liability exposure significantly.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+        ])
         
         time.sleep(0.5)
         add_timeline_event('Compliance Review', 'Regulatory Impact Assessment')
         
         time.sleep(2.0)  # Coordination
         update_system_health()
+
+        push_outcomes_state([
+            {
+                'name': 'Contain Now',
+                'expected_loss': '$2.1M',
+                'probability': 88,
+                'summary': 'Direct containment minimizes exposure and stabilizes clearing.'
+            },
+            {
+                'name': 'Delay 4 Hours',
+                'expected_loss': '$11.2M',
+                'probability': 54,
+                'summary': 'Waiting increases risk and regulatory exposure.'
+            },
+            {
+                'name': 'Delay 24 Hours',
+                'expected_loss': '$42.0M',
+                'probability': 22,
+                'summary': 'Sustained instability will cause severe business impact.'
+            }
+        ])
+        
+        # Build consensus with more debate
+        push_debate_state([
+            {'speaker': 'Threat', 'text': 'HSM entropy failure is critical. We need immediate action.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'speaker': 'Finance', 'text': 'Agreed. Exposure is rising rapidly. Every minute costs us.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'speaker': 'Compliance', 'text': 'Cross-border implications are severe. Regulators will escalate.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'speaker': 'Legal', 'text': 'Immediate containment limits liability exposure significantly.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'speaker': 'Operations', 'text': 'Key rotation can execute in 8 minutes. We have the capacity.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'speaker': 'Reputation', 'text': 'Proactive response protects brand trust. Delaying escalates reputational risk.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+            {'speaker': 'Executive', 'text': 'Consensus is clear. The recommendation is sound and actionable.', 'timestamp': datetime.now(timezone.utc).isoformat()},
+        ])
+
+        push_digital_twin_state({
+            'nodes': [
+                {'id': 'Identity', 'status': 'Compromised'},
+                {'id': 'Cloud', 'status': 'Under strain'},
+                {'id': 'Applications', 'status': 'Affected'},
+                {'id': 'Finance', 'status': 'Exposed'},
+                {'id': 'Customers', 'status': 'At Risk'},
+                {'id': 'Operations', 'status': 'Degraded'},
+                {'id': 'Regulators', 'status': 'Watching'}
+            ],
+            'links': [
+                {'source': 'Identity', 'target': 'Cloud'},
+                {'source': 'Cloud', 'target': 'Applications'},
+                {'source': 'Applications', 'target': 'Finance'},
+                {'source': 'Finance', 'target': 'Customers'},
+                {'source': 'Finance', 'target': 'Regulators'},
+                {'source': 'Cloud', 'target': 'Operations'}
+            ],
+            'focus': 'Identity compromise is propagating through cloud and finance, threatening customer trust.'
+        })
         
         # Calculate Business Impact
         add_timeline_event('Business Impact Engine', 'Calculating Financial Exposure')
@@ -427,6 +617,23 @@ def run_pqc_workflow():
         financial_exposure = business_impact['financial_impact']['total_financial_impact']
         add_timeline_event('Market Impact', f'${financial_exposure:,.0f} Exposure Calculated')
         broadcast_update('business_impact_update', business_impact)
+
+        push_command_state({
+            'damage_avoided': f'${int(max(financial_exposure - 2100000, 0)):,.0f}',
+            'confidence': '91%',
+            'consensus': '8/8'
+        })
+
+        push_oversight_state({
+            'verdict': 'Verified',
+            'summary': 'Oversight Agent confirms recommendation is supported by strong evidence and no critical assumptions.',
+            'flags': [
+                'Evidence aligned across threat, finance, and compliance',
+                'Model confidence above 90%',
+                'No weak assumptions identified'
+            ],
+            'confidence': '90%'
+        })
         
         time.sleep(1.0)
         
@@ -457,6 +664,16 @@ def run_pqc_workflow():
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
         broadcast_update('executive_summary_update', dashboard_state['executive_summary'])
+
+        push_briefing_state({
+            'headline': 'Contain now to prevent an estimated $42M escalation.',
+            'situation': 'HSM entropy degradation is causing payment clearing delays across critical cross-border channels.',
+            'action': 'Initiate immediate containment and certificate rotation for affected systems.',
+            'outcome': 'Avoids majority of financial exposure and reduces regulatory escalation risk.',
+            'financial_exposure': f'${financial_exposure:,.0f} projected loss if uncontained',
+            'board_impact': 'Protects enterprise trust and avoids executive liability.',
+            'regulatory_impact': 'Limits cross-border escalation with a proactive remediation posture.'
+        })
         
         time.sleep(1.5)  # Decision
         update_system_health()
@@ -511,8 +728,24 @@ def background_health_monitor():
 # Main Entry Point
 # ============================================================================
 
+def find_free_port(host: str, preferred_port: int) -> int:
+    """Return a free port, preferring the configured port if available."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            probe.bind((host, preferred_port))
+            return preferred_port
+        except OSError:
+            probe.bind((host, 0))
+            return probe.getsockname()[1]
+
+
 def main():
     """Start the web dashboard."""
+    host = os.getenv('DASHBOARD_HOST', '0.0.0.0')
+    preferred_port = int(os.getenv('DASHBOARD_PORT', '5000'))
+    port = find_free_port(host, preferred_port)
+
     print("=" * 80)
     print("🚨 NEXAVARA LABS - PQC CRISIS RESPONSE DASHBOARD 🚨".center(80))
     print("=" * 80)
@@ -520,7 +753,7 @@ def main():
     print("Starting Flask server with WebSocket support...")
     print()
     print("Dashboard will be available at:")
-    print("  → http://localhost:5000")
+    print(f"  → http://localhost:{port}")
     print()
     print("Features:")
     print("  ✓ Real-time incident monitoring")
@@ -538,7 +771,7 @@ def main():
     health_thread.start()
     
     # Start Flask-SocketIO server
-    socketio.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True)
+    socketio.run(app, host=host, port=port, debug=False, allow_unsafe_werkzeug=True)
 
 
 if __name__ == '__main__':

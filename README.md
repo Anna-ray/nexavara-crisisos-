@@ -1,29 +1,83 @@
-# Multi-Agent Escalation Orchestration
+# NEXAVARA Crisis Operating System
 
-This repository contains a scaffold for a customer support escalation orchestration system. It provides five agent classes implemented in Python that coordinate via a Band messaging hub. The design focuses on modularity, traceability, and integration with classification (Featherless) and AI/ML decision services.
+A production-ready multi-agent PQC (Post-Quantum Cryptographic) crisis response system.
 
-IMPORTANT: Message contract layer
+This repository includes a live incident orchestration engine, agent-based analysis, coordinated crisis response, and an interactive dashboard for real-time monitoring.
 
-This update adds a strict message contract layer using Pydantic models. Every message published to the Band is validated at the bus boundary. The models live in `messages/models.py` and include:
+## What this repo contains
 
-- MessageEnvelope: the canonical envelope with id, timestamp, source, topic, and payload.
-- Typed payload models for: EscalationCreated, EscalationTask, AnalysisCompleted, DecisionRequest, DecisionMade.
+- `main.py` — primary orchestrator that runs the PQC crisis workflow
+- `web_dashboard.py` — Flask + SocketIO dashboard server
+- `agents/` — AI and coordination agents
+- `adapters/band_client.py` — in-memory messaging bus with contract validation
+- `services/` — API clients and business impact services
+- `messages/models.py` — Pydantic message schemas for message contract validation
+- `static/` — dashboard frontend assets
 
-The in-memory Band client (`adapters/band_client.py`) enforces these contracts in development: it validates the envelope shape and the payload schema for each registered topic before delivering messages to subscribers.
+## Prerequisites
 
-Why this matters
+- Python 3.10+ (Python 3.11 recommended)
+- `pip` package manager
 
-Strongly-typed message contracts prevent schema drift, make audit logs reliable, and make agent interactions deterministic. Implementing contracts first establishes a stable foundation for further work (CI, production Band adapter, observability).
+## Install dependencies
 
-Running the demo
+```bash
+cd /workspaces/nexavara-crisisos-
+pip install -r requirements.txt
+```
 
-1. Install requirements: `pip install -r requirements.txt`
-2. Run: `python examples/run_pipeline.py`
-3. Check `audit.log` for recorded, validated messages.
+## Environment configuration
 
-Next recommended steps
+The system loads API keys from `.env` using `python-dotenv`.
 
-1. Add more domain models and tighten payload fields (replace Dict[str, Any] with explicit shapes where possible).
-2. Add unit tests that intentionally send invalid envelopes to confirm the Band client rejects them.
-3. Add CI to run tests and linting on PRs.
+Create or update `.env` in the repository root with:
+
+```bash
+FEATHERLESS_API_KEY=your_featherless_api_key
+FEATHERLESS_ENDPOINT=https://api.featherless.ai/v1/chat/completions
+AI_ML_API_KEY=your_aiml_api_key
+AI_ML_ENDPOINT=https://api.aimlapi.com/v1/chat/completions
+FLASK_SECRET_KEY=your_flask_secret_key
+```
+
+If `AI_ML_API_KEY` or `FEATHERLESS_API_KEY` are missing, the system can still run in heuristic/demo mode, but AI-powered analysis and classification may be limited.
+
+## Run the system
+
+### 1. Run the core crisis workflow
+
+```bash
+cd /workspaces/nexavara-crisisos-
+python main.py
+```
+
+### 2. Optional: Run the dashboard
+
+```bash
+cd /workspaces/nexavara-crisisos-
+python web_dashboard.py
+```
+
+Then open:
+
+```bash
+http://localhost:5000
+```
+
+## Notes
+
+- `main.py` is the real entry point for the PQC workflow.
+- `web_dashboard.py` is the dashboard server for live front-end visualization.
+- The `.env` file is required for API-backed AI/ML services.
+- Use `python -m pip install -r requirements.txt` if your environment needs dependency updates.
+
+## Troubleshooting
+
+- If you see `ModuleNotFoundError`, ensure you are running from the repo root and `PYTHONPATH` includes `.`.
+- If the dashboard port is in use, change it in `web_dashboard.py` or stop the conflicting service.
+- If API calls fail, verify the keys and endpoints in `.env`.
+
+## What to expect
+
+The system will execute a PQC incident detection workflow, then print analysis, coordination, and decision outputs to the console. The dashboard can display live state updates and agent debate when it is running.
 

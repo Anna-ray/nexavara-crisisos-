@@ -1,5 +1,6 @@
 import threading
 from typing import Callable, Dict, Any
+from pydantic import BaseModel
 from messages.models import MessageEnvelope, TOPIC_PAYLOAD_MODELS
 
 
@@ -35,6 +36,14 @@ class InMemoryBandClient(BandClient):
         # full envelope already, we respect its fields but ensure required ones exist.
         if isinstance(message, MessageEnvelope):
             envelope_obj = message
+        elif isinstance(message, BaseModel):
+            envelope_obj = MessageEnvelope.model_validate(
+                {
+                    "source": "unknown",
+                    "topic": topic,
+                    "payload": message.model_dump(),
+                }
+            )
         else:
             # Ensure message contains payload dict
             envelope_payload = (
