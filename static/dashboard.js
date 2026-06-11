@@ -1,552 +1,405 @@
-// ============================================================================
-// NEXAVARA LABS - Dashboard JavaScript
-// Real-time WebSocket updates and interactive UI
-// ============================================================================
-
-// Global state
-let socket = null;
-let workflowRunning = false;
-let startTime = null;
-
-// ============================================================================
-// Initialization
-// ============================================================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 NEXAVARA LABS Dashboard initializing...');
-    
-    // Initialize WebSocket connection
-    initializeWebSocket();
-    
-    // Setup event listeners
-    setupEventListeners();
-    
-    // Start clock
-    updateClock();
-    setInterval(updateClock, 1000);
-    
-    // Hide loading overlay
-    setTimeout(() => {
-        document.getElementById('loadingOverlay').classList.remove('active');
-    }, 1000);
+const socket = io({
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionAttempts: 10
 });
 
-// ============================================================================
-// WebSocket Connection
-// ============================================================================
+const state = {
+    command: {},
+    council: [],
+    debate: [],
+    outcomes: [],
+    twin: {},
+    oversight: {},
+    briefing: {}
+};
 
-function initializeWebSocket() {
-    console.log('📡 Connecting to WebSocket...');
-    
-    socket = io({
-        transports: ['websocket', 'polling'],
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionAttempts: 5
-    });
-    
-    // Connection events
+function $(id) {
+    return document.getElementById(id);
+}
+
+function init() {
     socket.on('connect', handleConnect);
     socket.on('disconnect', handleDisconnect);
-    socket.on('connection_status', handleConnectionStatus);
-    
-    // Data events
     socket.on('state_update', handleStateUpdate);
-    socket.on('incident_update', handleIncidentUpdate);
-    socket.on('analysis_update', handleAnalysisUpdate);
-    socket.on('coordination_update', handleCoordinationUpdate);
-    socket.on('decision_update', handleDecisionUpdate);
-    socket.on('metrics_update', handleMetricsUpdate);
-    socket.on('audit_update', handleAuditUpdate);
-    socket.on('health_update', handleHealthUpdate);
+    socket.on('command_update', handleCommandUpdate);
+    socket.on('council_update', handleCouncilUpdate);
+    socket.on('debate_update', handleDebateUpdate);
+    socket.on('outcomes_update', handleOutcomesUpdate);
+    socket.on('twin_update', handleTwinUpdate);
+    socket.on('oversight_update', handleOversightUpdate);
+    socket.on('briefing_update', handleBriefingUpdate);
     socket.on('workflow_status', handleWorkflowStatus);
+
+    $('startWorkflow').addEventListener('click', () => {
+        socket.emit('start_workflow');
+        setButtonLoading(true);
+    });
+
+    // Setup tab switching
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            const tab = e.target.dataset.tab;
+            switchTab(tab);
+        });
+    });
+
+    updateConnection(false);
 }
 
 function handleConnect() {
-    console.log('✅ WebSocket connected');
-    updateConnectionStatus(true);
-    showToast('Connected to server', 'success');
-    
-    // Request current state
+    updateConnection(true);
+    showToast('Connected to CrisisOS', 'success');
     socket.emit('request_state');
 }
 
 function handleDisconnect() {
-    console.log('❌ WebSocket disconnected');
-    updateConnectionStatus(false);
-    showToast('Disconnected from server', 'error');
+    updateConnection(false);
+    showToast('Connection lost. Reconnecting...', 'warning');
 }
 
-function handleConnectionStatus(data) {
-    console.log('Connection status:', data);
-}
-
-function updateConnectionStatus(connected) {
-    const dot = document.getElementById('connectionDot');
-    const text = document.getElementById('connectionText');
-    
-    if (connected) {
-        dot.classList.add('connected');
-        text.textContent = 'Connected';
-    } else {
-        dot.classList.remove('connected');
-        text.textContent = 'Disconnected';
-    }
-}
-
-// ============================================================================
-// Event Listeners
-// ============================================================================
-
-function setupEventListeners() {
-    // Start workflow button
-    document.getElementById('startWorkflow').addEventListener('click', () => {
-        if (!workflowRunning) {
-            startWorkflow();
-        }
+function switchTab(tabName) {
+    // Update button active states
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
     });
     
-    // Reset dashboard button
-    document.getElementById('resetDashboard').addEventListener('click', () => {
-        if (confirm('Reset dashboard? This will clear all current data.')) {
-            resetDashboard();
-        }
+    // Update content visibility
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
     });
     
-    // Refresh audit button
-    document.getElementById('refreshAudit').addEventListener('click', () => {
-        refreshAuditTrail();
+    if (tabName === 'members') {
+        $('councilList').classList.add('active');
+    } else if (tabName === 'debate') {
+        $('debateStream').classList.add('active');
+    }
+}
+
+
+    if (payload.command) handleCommandUpdate(payload.command);
+    if (payload.council) handleCouncilUpdate(payload.council);
+    if (payload.outcomes) handleOutcomesUpdate(payload.outcomes);
+    if (payload.digital_twin) handleTwinUpdate(payload.digital_twin);
+    if (payload.oversight) handleOversightUpdate(payload.oversight);
+    if (payload.executive_briefing) handleBriefingUpdate(payload.executive_briefing);
+}
+
+function handleCommandUpdate(command) {
+    state.command = command;
+    $('crisisTitle').textContent = command.crisis_title;
+    $('crisisSummary').textContent = command.crisis_summary || 'The AI council is evaluating incident impact and recommendation trade-offs.';
+    $('recommendedAction').textContent = command.recommended_action;
+    $('expectedOutcome').textContent = command.expected_outcome;
+    $('damageAvoided').textContent = command.damage_avoided;
+    $('confidenceValue').textContent = command.confidence;
+    $('consensusValue').textContent = command.consensus;
+    $('crisisStatus').textContent = command.crisis_status;
+    $('crisisStatus').className = `status-chip status-${command.crisis_status.toLowerCase().replace(/\s+/g, '-')}`;
+}
+
+function getDirectorIcon(role) {
+    const roleMap = {
+        'threat': '⚠️',
+        'finance': '💰',
+        'compliance': '⚖️',
+        'legal': '📋',
+        'operations': '⚙️',
+        'reputation': '🎯',
+        'executive': '👔',
+        'oversight': '🔍'
+    };
+    return roleMap[role.toLowerCase()] || '👤';
+}
+
+function handleCouncilUpdate(council) {
+    state.council = council;
+    const container = $('councilList');
+    container.innerHTML = '';
+    if (!council || council.length === 0) {
+        container.innerHTML = '<div class="panel-empty">No council data yet.</div>';
+        return;
+    }
+
+    council.forEach(member => {
+        const card = document.createElement('div');
+        card.className = 'council-card';
+        const icon = getDirectorIcon(member.role);
+        card.innerHTML = `
+            <div class="council-card-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.4em;">${icon}</span>
+                    <div>
+                        <div class="council-role">${member.role}</div>
+                        <div class="council-status ${member.vote.toLowerCase()}">${member.vote}</div>
+                    </div>
+                </div>
+                <div class="confidence-pill">${member.confidence}%</div>
+            </div>
+            <div class="council-opinion">${member.opinion}</div>
+            <div class="council-evidence">${member.evidence}</div>
+            <div class="council-tag">${member.status}</div>
+        `;
+        container.appendChild(card);
     });
-    
-    // Download audit button
-    document.getElementById('downloadAudit').addEventListener('click', () => {
-        downloadAuditTrail();
-    });
 }
 
-// ============================================================================
-// Workflow Control
-// ============================================================================
-
-function startWorkflow() {
-    console.log('▶️ Starting workflow...');
-    workflowRunning = true;
-    startTime = Date.now();
+function handleDebateUpdate(debateMessages) {
+    if (!debateMessages) return;
+    state.debate = Array.isArray(debateMessages) ? debateMessages : [debateMessages];
     
-    // Update UI
-    document.getElementById('startWorkflow').disabled = true;
-    document.getElementById('startWorkflow').style.opacity = '0.5';
+    const container = $('debateStream');
+    container.innerHTML = '';
     
-    // Show loading
-    const overlay = document.getElementById('loadingOverlay');
-    overlay.classList.add('active');
-    
-    // Emit start event
-    socket.emit('start_workflow');
-    
-    showToast('Workflow started', 'info');
-}
-
-function resetDashboard() {
-    location.reload();
-}
-
-// ============================================================================
-// State Update Handlers
-// ============================================================================
-
-function handleStateUpdate(state) {
-    console.log('📊 State update:', state);
-    
-    if (state.incident) {
-        updateIncidentCard(state.incident);
-    }
-    
-    if (state.analysis) {
-        updateAnalysisCard(state.analysis);
-    }
-    
-    if (state.coordination) {
-        updateCoordinationCard(state.coordination);
-    }
-    
-    if (state.decision) {
-        updateDecisionCard(state.decision);
-    }
-    
-    if (state.metrics) {
-        updateMetricsCard(state.metrics);
-    }
-    
-    if (state.audit_records && state.audit_records.length > 0) {
-        updateAuditTrail(state.audit_records);
-    }
-}
-
-function handleIncidentUpdate(data) {
-    console.log('🚨 Incident update:', data);
-    updateIncidentCard(data.incident);
-    showToast('Incident detected', 'warning');
-}
-
-function handleAnalysisUpdate(data) {
-    console.log('🔬 Analysis update:', data);
-    updateAnalysisCard(data.analysis);
-    showToast('Analysis completed', 'success');
-}
-
-function handleCoordinationUpdate(data) {
-    console.log('🏢 Coordination update:', data);
-    updateCoordinationCard(data.coordination);
-    showToast('Coordination updated', 'info');
-}
-
-function handleDecisionUpdate(data) {
-    console.log('🎯 Decision update:', data);
-    updateDecisionCard(data.decision);
-    showToast('Decision made', 'success');
-}
-
-function handleMetricsUpdate(data) {
-    console.log('📊 Metrics update:', data);
-    updateMetricsCard(data);
-}
-
-function handleAuditUpdate(data) {
-    console.log('📝 Audit update:', data);
-    if (data.records) {
-        updateAuditTrail(data.records);
-    }
-}
-
-function handleHealthUpdate(data) {
-    console.log('💚 Health update:', data);
-    // Could update system health indicators here
-}
-
-function handleWorkflowStatus(data) {
-    console.log('⚙️ Workflow status:', data);
-    
-    const overlay = document.getElementById('loadingOverlay');
-    const statusText = document.getElementById('statusText');
-    const statusDot = document.getElementById('statusDot');
-    
-    switch (data.status) {
-        case 'started':
-            statusText.textContent = 'RUNNING';
-            statusDot.className = 'status-dot running';
-            break;
-        case 'initializing':
-            overlay.querySelector('.loading-text').textContent = 'Initializing agents...';
-            break;
-        case 'agents_ready':
-            overlay.querySelector('.loading-text').textContent = 'Agents ready, injecting incident...';
-            break;
-        case 'incident_injected':
-            overlay.querySelector('.loading-text').textContent = 'Processing incident...';
-            break;
-        case 'completed':
-            overlay.classList.remove('active');
-            statusText.textContent = 'COMPLETED';
-            statusDot.className = 'status-dot';
-            workflowRunning = false;
-            document.getElementById('startWorkflow').disabled = false;
-            document.getElementById('startWorkflow').style.opacity = '1';
-            showToast('Workflow completed successfully', 'success');
-            break;
-        case 'error':
-            overlay.classList.remove('active');
-            statusText.textContent = 'ERROR';
-            statusDot.className = 'status-dot error';
-            workflowRunning = false;
-            showToast('Workflow error: ' + (data.error || 'Unknown error'), 'error');
-            break;
-    }
-}
-
-// ============================================================================
-// Card Update Functions
-// ============================================================================
-
-function updateIncidentCard(incident) {
-    document.getElementById('incidentId').textContent = incident.incident_id || 'N/A';
-    document.getElementById('incidentDescription').textContent = incident.description || 'No description';
-    document.getElementById('incidentSource').textContent = incident.source || 'Unknown';
-    
-    // Update severity badge
-    const severityBadge = document.getElementById('severityBadge');
-    const severity = incident.severity_initial || 'unknown';
-    severityBadge.textContent = severity.toUpperCase();
-    severityBadge.className = 'severity-badge';
-    
-    // Financial impact (will be updated by analysis)
-    document.getElementById('financialImpact').textContent = '$0/min';
-}
-
-function updateAnalysisCard(analysis) {
-    const content = document.getElementById('analysisContent');
-    const progress = document.getElementById('analysisProgress');
-    const status = document.getElementById('analysisStatus');
-    const confidence = document.getElementById('confidenceScore');
-    const severity = document.getElementById('severityLevel');
-    
-    // Update status
-    status.textContent = 'COMPLETED';
-    status.className = 'status-badge active';
-    
-    // Update progress
-    progress.style.width = '100%';
-    
-    // Update content
-    const rootCause = analysis.root_cause_hypothesis || 'Analysis in progress...';
-    content.innerHTML = `
-        <div style="margin-bottom: 1rem;">
-            <strong>Root Cause:</strong><br>
-            ${rootCause}
-        </div>
-    `;
-    
-    // Update metrics
-    const confidenceValue = analysis.confidence_score || 0;
-    confidence.textContent = `${(confidenceValue * 100).toFixed(0)}%`;
-    
-    const severityLevel = analysis.severity_level || 'Unknown';
-    severity.textContent = severityLevel;
-    
-    // Update severity badge
-    const severityBadge = document.getElementById('severityBadge');
-    severityBadge.textContent = severityLevel;
-    if (severityLevel.includes('5')) {
-        severityBadge.className = 'severity-badge level-5';
-    } else if (severityLevel.includes('4')) {
-        severityBadge.className = 'severity-badge level-4';
-    } else if (severityLevel.includes('3')) {
-        severityBadge.className = 'severity-badge level-3';
-    }
-    
-    // Update financial impact
-    const financial = analysis.financial_exposure_per_minute || 0;
-    document.getElementById('financialImpact').textContent = `$${financial.toLocaleString()}/min`;
-}
-
-function updateCoordinationCard(coordination) {
-    const crisisRoom = document.getElementById('crisisRoom');
-    const status = document.getElementById('coordinationStatus');
-    const channelCount = document.getElementById('channelCount');
-    const teamCount = document.getElementById('teamCount');
-    const stakeholderCount = document.getElementById('stakeholderCount');
-    
-    // Update status
-    status.textContent = 'ACTIVE';
-    status.className = 'status-badge active';
-    
-    // Update crisis room info
-    const roomId = coordination.crisis_room_id || 'N/A';
-    const channels = coordination.channels_initialized || [];
-    const stakeholders = coordination.stakeholders_notified || [];
-    
-    crisisRoom.innerHTML = `
-        <div style="margin-bottom: 0.5rem;">
-            <strong>Crisis Room:</strong> ${roomId}
-        </div>
-        <div style="font-size: 0.875rem; color: var(--text-secondary);">
-            <strong>Channels:</strong> ${channels.slice(0, 3).join(', ')}${channels.length > 3 ? '...' : ''}
-        </div>
-    `;
-    
-    // Update stats
-    channelCount.textContent = channels.length;
-    
-    // Count unique teams from stakeholders
-    const teams = new Set();
-    stakeholders.forEach(s => {
-        if (s.team) teams.add(s.team);
-    });
-    teamCount.textContent = teams.size;
-    stakeholderCount.textContent = stakeholders.length;
-}
-
-function updateDecisionCard(decision) {
-    const content = document.getElementById('decisionContent');
-    const priorityBadge = document.getElementById('priorityBadge');
-    const approvalRequired = document.getElementById('approvalRequired');
-    const estimatedDowntime = document.getElementById('estimatedDowntime');
-    
-    // Update priority badge
-    const priority = decision.priority || 'P2';
-    priorityBadge.textContent = priority;
-    priorityBadge.className = `priority-badge ${priority.toLowerCase()}`;
-    
-    // Update content
-    const recommendation = decision.recommendation || 'Processing...';
-    content.innerHTML = `
-        <div style="line-height: 1.6;">
-            <strong>Executive Recommendation:</strong><br>
-            ${recommendation}
-        </div>
-    `;
-    
-    // Update metadata
-    approvalRequired.textContent = decision.approval_required ? 'Yes' : 'No';
-    const downtime = decision.estimated_downtime_minutes || 0;
-    estimatedDowntime.textContent = `${downtime} min`;
-}
-
-function updateMetricsCard(metrics) {
-    const executionTime = document.getElementById('executionTime');
-    const agentsActive = document.getElementById('agentsActive');
-    const messagesProcessed = document.getElementById('messagesProcessed');
-    const systemUptime = document.getElementById('systemUptime');
-    const metricsStatus = document.getElementById('metricsStatus');
-    
-    // Update execution time
-    const time = metrics.execution_time || 0;
-    executionTime.textContent = `${time.toFixed(2)}s`;
-    
-    // Update agents
-    const active = metrics.agents_active || 0;
-    agentsActive.textContent = `${active}/4`;
-    
-    // Update messages
-    messagesProcessed.textContent = metrics.messages_processed || 0;
-    
-    // Update status
-    const status = metrics.system_status || 'initializing';
-    metricsStatus.textContent = status.toUpperCase();
-    metricsStatus.className = 'status-badge';
-    if (status === 'running') {
-        metricsStatus.classList.add('processing');
-    } else if (status === 'completed') {
-        metricsStatus.classList.add('active');
-    }
-}
-
-function updateAuditTrail(records) {
-    const auditLog = document.getElementById('auditLog');
-    const recordCount = document.getElementById('recordCount');
-    
-    if (!records || records.length === 0) {
-        auditLog.innerHTML = '<div class="placeholder">No audit records yet...</div>';
-        recordCount.textContent = '0 records';
+    if (state.debate.length === 0) {
+        container.innerHTML = '<div class="panel-empty">Debate stream will appear here.</div>';
         return;
     }
     
-    // Update count
-    recordCount.textContent = `${records.length} records`;
-    
-    // Display last 10 records
-    const displayRecords = records.slice(-10).reverse();
-    
-    auditLog.innerHTML = displayRecords.map(record => {
-        const timestamp = new Date(record.timestamp).toLocaleTimeString();
-        const agent = record.agent_name || 'System';
-        const action = record.action || 'Unknown';
-        
-        return `
-            <div class="audit-record">
-                <div style="color: var(--accent-cyan); font-weight: 600;">
-                    [${timestamp}] ${agent}
-                </div>
-                <div style="color: var(--text-secondary); margin-top: 0.25rem;">
-                    ${action}
-                </div>
-            </div>
+    state.debate.forEach(msg => {
+        const msgEl = document.createElement('div');
+        msgEl.className = 'debate-message';
+        const timestamp = new Date(msg.timestamp || Date.now()).toLocaleTimeString();
+        msgEl.innerHTML = `
+            <div class="debate-speaker">${getDirectorIcon(msg.speaker)} ${msg.speaker}</div>
+            <div class="debate-text">${msg.text}</div>
+            <div class="debate-timestamp">${timestamp}</div>
         `;
-    }).join('');
+        container.appendChild(msgEl);
+    });
+    
+    // Auto-scroll to bottom
+    container.scrollTop = container.scrollHeight;
 }
 
-// ============================================================================
-// Utility Functions
-// ============================================================================
+function handleOutcomesUpdate(outcomes) {
+    state.outcomes = outcomes;
+    const container = $('scenarioList');
+    container.innerHTML = '';
+    if (!outcomes || outcomes.length === 0) {
+        container.innerHTML = '<div class="panel-empty">Awaiting scenario simulation.</div>';
+        return;
+    }
 
-function updateClock() {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('en-US', { 
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
+    outcomes.forEach((scenario, index) => {
+        const card = document.createElement('div');
+        card.className = `scenario-card ${index === 0 ? 'primary' : ''}`;
+        card.innerHTML = `
+            <div class="scenario-label">${scenario.name}</div>
+            <div class="scenario-loss">${scenario.expected_loss}</div>
+            <div class="scenario-probability">Probability ${scenario.probability}%</div>
+            <div class="scenario-summary">${scenario.summary}</div>
+            <button class="scenario-action">Select</button>
+        `;
+        container.appendChild(card);
     });
-    document.getElementById('headerTimestamp').textContent = timeString;
+}
+
+function handleTwinUpdate(twin) {
+    state.twin = twin;
+    const canvas = $('twinCanvas');
+    
+    if (!twin || !twin.nodes || twin.nodes.length === 0) {
+        canvas.innerHTML = '<div class="twin-empty">Digital Twin is initializing.</div>';
+        return;
+    }
+
+    // Use existing SVG or create new one
+    let svg = canvas.querySelector('svg.twin-graph-svg');
+    if (!svg) {
+        svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'twin-graph-svg');
+        svg.setAttribute('viewBox', '0 0 480 400');
+        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        // Add gradients and filters
+        defs.innerHTML = `
+            <filter id="node-shadow">
+                <feDropShadow dx="0" dy="0" stdDeviation="3" flood-opacity="0.5"/>
+            </filter>
+            <linearGradient id="edge-active" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#36d9ff;stop-opacity:0" />
+                <stop offset="50%" style="stop-color:#36d9ff;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#36d9ff;stop-opacity:0" />
+            </linearGradient>
+            <linearGradient id="edge-at-risk" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#ffb85c;stop-opacity:0" />
+                <stop offset="50%" style="stop-color:#ffb85c;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#ffb85c;stop-opacity:0" />
+            </linearGradient>
+            <linearGradient id="edge-critical" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#ff5f73;stop-opacity:0" />
+                <stop offset="50%" style="stop-color:#ff5f73;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#ff5f73;stop-opacity:0" />
+            </linearGradient>
+        `;
+        svg.appendChild(defs);
+        
+        const edgesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        edgesContainer.setAttribute('class', 'edges-container');
+        edgesContainer.setAttribute('id', 'edgesContainer');
+        svg.appendChild(edgesContainer);
+        
+        const nodesContainer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        nodesContainer.setAttribute('class', 'nodes-container');
+        nodesContainer.setAttribute('id', 'nodesContainer');
+        svg.appendChild(nodesContainer);
+        
+        canvas.innerHTML = '';
+        canvas.appendChild(svg);
+    }
+
+    // Position nodes in a circular layout
+    const positions = {};
+    const nodeCount = twin.nodes.length;
+    const centerX = 240;
+    const centerY = 200;
+    const radius = 120;
+    
+    twin.nodes.forEach((node, index) => {
+        const angle = (index / nodeCount) * Math.PI * 2;
+        positions[node.id] = {
+            x: centerX + Math.cos(angle) * radius,
+            y: centerY + Math.sin(angle) * radius
+        };
+    });
+
+    // Render edges
+    const edgesContainer = $('edgesContainer');
+    edgesContainer.innerHTML = '';
+    
+    if (twin.links && twin.links.length > 0) {
+        twin.links.forEach((link, idx) => {
+            const source = positions[link.source];
+            const target = positions[link.target];
+            
+            if (source && target) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', source.x);
+                line.setAttribute('y1', source.y);
+                line.setAttribute('x2', target.x);
+                line.setAttribute('y2', target.y);
+                line.setAttribute('stroke', '#36d9ff');
+                line.setAttribute('stroke-width', '1.5');
+                
+                // Determine edge severity and animation
+                const sourceNode = twin.nodes.find(n => n.id === link.source);
+                const status = sourceNode?.status?.toLowerCase() || 'standby';
+                line.setAttribute('class', `edge ${status === 'compromised' ? 'critical' : status === 'exposed' ? 'active' : status === 'at-risk' ? 'at-risk' : 'standby'}`);
+                
+                // Set animation delay for sequential propagation
+                line.style.animationDelay = `${idx * 0.1}s`;
+                edgesContainer.appendChild(line);
+            }
+        });
+    }
+
+    // Render nodes
+    const nodesContainer = $('nodesContainer');
+    nodesContainer.innerHTML = '';
+    
+    twin.nodes.forEach((node, idx) => {
+        const pos = positions[node.id];
+        const statusLower = node.status?.toLowerCase() || 'standby';
+        
+        // Create circle
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', pos.x);
+        circle.setAttribute('cy', pos.y);
+        circle.setAttribute('r', '14');
+        circle.setAttribute('class', `node ${statusLower}`);
+        circle.setAttribute('filter', 'url(#node-shadow)');
+        circle.style.animationDelay = `${idx * 0.08}s`;
+        nodesContainer.appendChild(circle);
+        
+        // Create label
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', pos.x);
+        text.setAttribute('y', pos.y + 28);
+        text.setAttribute('class', 'node-status');
+        text.setAttribute('fill', '#08c1ff');
+        text.setAttribute('font-family', 'Inter, sans-serif');
+        text.textContent = node.id;
+        text.style.animationDelay = `${idx * 0.08}s`;
+        nodesContainer.appendChild(text);
+    });
+    
+    // Add focus description
+    let focusDiv = canvas.querySelector('.twin-focus');
+    if (!focusDiv) {
+        focusDiv = document.createElement('div');
+        focusDiv.className = 'twin-focus';
+        canvas.appendChild(focusDiv);
+    }
+    focusDiv.textContent = twin.focus || 'Crisis propagation model is computing...';
+}
+
+function handleOversightUpdate(oversight) {
+    state.oversight = oversight;
+    $('oversightSummary').textContent = oversight.summary;
+    $('oversightVerdict').textContent = oversight.verdict;
+    $('oversightConfidence').textContent = oversight.confidence;
+    const flags = $('oversightFlags');
+    flags.innerHTML = '';
+    if (oversight.flags && oversight.flags.length > 0) {
+        oversight.flags.forEach(flag => {
+            const chip = document.createElement('span');
+            chip.className = 'flag';
+            chip.textContent = flag;
+            flags.appendChild(chip);
+        });
+    }
+}
+
+function handleBriefingUpdate(briefing) {
+    state.briefing = briefing;
+    $('briefingHeadline').textContent = briefing.headline;
+    $('briefingSituation').textContent = briefing.situation;
+    $('briefingAction').textContent = briefing.action;
+    $('briefingOutcome').textContent = briefing.outcome;
+    $('briefingFinancial').textContent = briefing.financial_exposure;
+    $('briefingBoard').textContent = briefing.board_impact;
+    $('briefingRegulatory').textContent = briefing.regulatory_impact;
+}
+
+function handleWorkflowStatus(status) {
+    if (!status || !status.status) return;
+    if (status.status === 'completed') {
+        setButtonLoading(false);
+        showToast('Crisis response completed.', 'success');
+    }
+    if (status.status === 'error') {
+        setButtonLoading(false);
+        showToast('Workflow error occurred.', 'error');
+    }
+}
+
+function updateConnection(connected) {
+    const text = $('connectionText');
+    text.textContent = connected ? 'online' : 'offline';
+    text.className = connected ? 'connection-online' : 'connection-offline';
+}
+
+function setButtonLoading(active) {
+    const button = $('startWorkflow');
+    button.disabled = active;
+    button.classList.toggle('button-loading', active);
+    button.textContent = active ? 'PROCESSING…' : 'LAUNCH CRISIS RESPONSE';
 }
 
 function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    
+    const container = $('toastContainer');
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
-    
     container.appendChild(toast);
-    
-    // Remove after 5 seconds
     setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => {
-            container.removeChild(toast);
-        }, 300);
-    }, 5000);
+        toast.classList.add('expired');
+        setTimeout(() => container.removeChild(toast), 300);
+    }, 4000);
 }
 
-function refreshAuditTrail() {
-    fetch('/api/audit')
-        .then(response => response.json())
-        .then(data => {
-            if (data.records) {
-                updateAuditTrail(data.records);
-                showToast('Audit trail refreshed', 'success');
-            }
-        })
-        .catch(error => {
-            console.error('Error refreshing audit trail:', error);
-            showToast('Failed to refresh audit trail', 'error');
-        });
-}
-
-function downloadAuditTrail() {
-    fetch('/api/audit')
-        .then(response => response.json())
-        .then(data => {
-            if (data.records) {
-                const blob = new Blob([JSON.stringify(data.records, null, 2)], {
-                    type: 'application/json'
-                });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `audit_trail_${Date.now()}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast('Audit trail downloaded', 'success');
-            }
-        })
-        .catch(error => {
-            console.error('Error downloading audit trail:', error);
-            showToast('Failed to download audit trail', 'error');
-        });
-}
-
-// ============================================================================
-// Error Handling
-// ============================================================================
-
-window.addEventListener('error', (event) => {
-    console.error('Global error:', event.error);
-    showToast('An error occurred. Check console for details.', 'error');
-});
-
-// ============================================================================
-// Console Banner
-// ============================================================================
-
-console.log('%c🚀 NEXAVARA LABS', 'font-size: 24px; font-weight: bold; color: #06b6d4;');
-console.log('%cPQC Crisis Response Dashboard', 'font-size: 14px; color: #9ca3af;');
-console.log('%cReal-time Multi-Agent System Monitoring', 'font-size: 12px; color: #6b7280;');
-console.log('');
-console.log('Dashboard initialized successfully ✅');
-console.log('WebSocket connection: Establishing...');
-console.log('');
-
-// Made with Bob
+window.addEventListener('DOMContentLoaded', init);

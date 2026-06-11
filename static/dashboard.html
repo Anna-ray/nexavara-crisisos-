@@ -1,254 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXAVARA CrisisOS - AI-Powered Crisis Intelligence Platform</title>
-    <link rel="stylesheet" href="/static/styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEXAVARA CrisisOS — AI Crisis Command Center</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="dashboard-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="logo-icon">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="50" cy="50" r="8" class="node-center"/>
-                        <circle cx="30" cy="25" r="5" class="node"/>
-                        <circle cx="70" cy="25" r="5" class="node"/>
-                        <circle cx="85" cy="50" r="5" class="node"/>
-                        <circle cx="70" cy="75" r="5" class="node"/>
-                        <circle cx="30" cy="75" r="5" class="node"/>
-                        <circle cx="15" cy="50" r="5" class="node"/>
-                        <line x1="50" y1="50" x2="30" y2="25" class="connection"/>
-                        <line x1="50" y1="50" x2="70" y2="25" class="connection"/>
-                        <line x1="50" y1="50" x2="85" y2="50" class="connection"/>
-                        <line x1="50" y1="50" x2="70" y2="75" class="connection"/>
-                        <line x1="50" y1="50" x2="30" y2="75" class="connection"/>
-                        <line x1="50" y1="50" x2="15" y2="50" class="connection"/>
-                        <path d="M 60 20 L 90 10 L 85 35 Z" class="arrow"/>
-                    </svg>
-                </div>
-                <div class="logo-text">
-                    <h1>NEXAVARA <span class="crisis-os">CrisisOS</span></h1>
-                    <p class="subtitle">AI-Powered Crisis Intelligence Platform</p>
-                </div>
+    <div class="shell">
+        <header class="command-header">
+            <div class="brand-panel">
+                <svg class="nexavara-logo" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="nodePrimary" cx="30%" cy="30%">
+                            <stop offset="0%" style="stop-color:#08c1ff;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#0066cc;stop-opacity:1" />
+                        </radialGradient>
+                        <radialGradient id="nodeHub" cx="40%" cy="40%">
+                            <stop offset="0%" style="stop-color:#36d9ff;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#08c1ff;stop-opacity:1" />
+                        </radialGradient>
+                        <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#08c1ff;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#36d9ff;stop-opacity:1" />
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                        <filter id="hubGlow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    
+                    <!-- Connection lines with glow -->
+                    <line x1="70" y1="70" x2="70" y2="25" stroke="url(#arrowGrad)" stroke-width="2" opacity="0.6" class="net-line"/>
+                    <line x1="70" y1="70" x2="105" y2="40" stroke="url(#arrowGrad)" stroke-width="2" opacity="0.6" class="net-line"/>
+                    <line x1="70" y1="70" x2="115" y2="70" stroke="url(#arrowGrad)" stroke-width="2" opacity="0.6" class="net-line"/>
+                    <line x1="70" y1="70" x2="105" y2="100" stroke="url(#arrowGrad)" stroke-width="2" opacity="0.6" class="net-line"/>
+                    <line x1="70" y1="70" x2="70" y2="115" stroke="url(#arrowGrad)" stroke-width="2" opacity="0.6" class="net-line"/>
+                    <line x1="70" y1="70" x2="35" y2="100" stroke="url(#arrowGrad)" stroke-width="2" opacity="0.6" class="net-line"/>
+                    <line x1="70" y1="70" x2="25" y2="70" stroke="url(#arrowGrad)" stroke-width="2" opacity="0.6" class="net-line"/>
+                    <line x1="70" y1="70" x2="35" y2="40" stroke="url(#arrowGrad)" stroke-width="2" opacity="0.6" class="net-line"/>
+                    
+                    <!-- Outer ring nodes -->
+                    <circle cx="70" cy="25" r="6" fill="url(#nodePrimary)" filter="url(#glow)" class="net-node"/>
+                    <circle cx="105" cy="40" r="6" fill="url(#nodePrimary)" filter="url(#glow)" class="net-node"/>
+                    <circle cx="115" cy="70" r="6" fill="url(#nodePrimary)" filter="url(#glow)" class="net-node"/>
+                    <circle cx="105" cy="100" r="6" fill="url(#nodePrimary)" filter="url(#glow)" class="net-node"/>
+                    <circle cx="70" cy="115" r="6" fill="url(#nodePrimary)" filter="url(#glow)" class="net-node"/>
+                    <circle cx="35" cy="100" r="6" fill="url(#nodePrimary)" filter="url(#glow)" class="net-node"/>
+                    <circle cx="25" cy="70" r="6" fill="url(#nodePrimary)" filter="url(#glow)" class="net-node"/>
+                    <circle cx="35" cy="40" r="6" fill="url(#nodePrimary)" filter="url(#glow)" class="net-node"/>
+                    
+                    <!-- Central hub with enhanced glow -->
+                    <circle cx="70" cy="70" r="10" fill="url(#nodeHub)" filter="url(#hubGlow)" class="net-hub"/>
+                    <circle cx="70" cy="70" r="8" fill="none" stroke="#36d9ff" stroke-width="0.5" opacity="0.5" class="hub-ring"/>
+                    
+                    <!-- Growth arrow (upward trajectory) -->
+                    <path d="M 110 90 L 130 60 L 125 70 L 135 60 L 130 65" fill="none" stroke="url(#arrowGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="growth-arrow"/>
+                </svg>
+                <div class="brand-badge">CRISIS OS</div>
+                <div class="brand-title">NEXAVARA</div>
+                <div class="brand-subtitle">Enterprise Crisis Operating System</div>
             </div>
-            <div class="header-status">
-                <div class="status-indicator">
-                    <span class="status-dot" id="statusDot"></span>
-                    <span class="status-text" id="statusText">READY</span>
-                </div>
-                <div class="timestamp" id="headerTimestamp">--:--:--</div>
+            <div class="command-status">
+                <div class="status-chip" id="crisisStatus">STANDBY</div>
+                <div class="status-line">Connected to <span id="connectionText">offline</span></div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <!-- Main Dashboard -->
-    <main class="dashboard-main">
-        <!-- Executive Summary Hero -->
-        <div class="executive-hero">
-            <div class="hero-left">
-                <div class="incident-title" id="incidentTitle">Post-Quantum Cryptographic Failure</div>
-                <div class="incident-subtitle" id="incidentSubtitle">Awaiting incident detection...</div>
-            </div>
-            <div class="hero-right">
-                <div class="financial-exposure">
-                    <div class="exposure-label">ESTIMATED EXPOSURE</div>
-                    <div class="exposure-amount" id="exposureAmount">$0</div>
-                    <div class="exposure-sublabel">Total Financial Impact</div>
+        <main class="command-center">
+            <section class="hero-panel">
+                <div class="hero-copy">
+                    <div class="eyebrow">CURRENT CRISIS</div>
+                    <h1 id="crisisTitle">Awaiting first strategic incident.</h1>
+                    <p id="crisisSummary">When a critical enterprise incident is active, NEXAVARA surfaces a single, authoritative recommendation backed by council consensus and outcome simulations.</p>
                 </div>
-            </div>
-        </div>
-
-        <!-- Key Metrics Row -->
-        <div class="metrics-row">
-            <div class="metric-card severity-card">
-                <div class="metric-icon">🚨</div>
-                <div class="metric-content">
-                    <div class="metric-label">Severity</div>
-                    <div class="metric-value severity-value" id="severityValue">--</div>
-                </div>
-            </div>
-            <div class="metric-card confidence-card">
-                <div class="metric-icon">📊</div>
-                <div class="metric-content">
-                    <div class="metric-label">Confidence</div>
-                    <div class="metric-value" id="confidenceValue">--%</div>
-                </div>
-            </div>
-            <div class="metric-card regulatory-card">
-                <div class="metric-icon">⚖️</div>
-                <div class="metric-content">
-                    <div class="metric-label">Regulatory Risk</div>
-                    <div class="metric-value" id="regulatoryValue">--</div>
-                </div>
-            </div>
-            <div class="metric-card systems-card">
-                <div class="metric-icon">🖥️</div>
-                <div class="metric-content">
-                    <div class="metric-label">Affected Systems</div>
-                    <div class="metric-value" id="systemsValue">0</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content Grid -->
-        <div class="dashboard-grid">
-            <!-- Crisis Timeline -->
-            <div class="card timeline-card">
-                <div class="card-header">
-                    <h2>⏱️ CRISIS TIMELINE</h2>
-                    <span class="status-badge" id="timelineStatus">MONITORING</span>
-                </div>
-                <div class="card-body">
-                    <div class="timeline-container" id="timelineContainer">
-                        <div class="placeholder">Waiting for incident detection...</div>
+                <div class="hero-metrics">
+                    <div class="hero-card">
+                        <span class="hero-card-label">RECOMMENDED ACTION</span>
+                        <div class="hero-card-value" id="recommendedAction">No active recommendation</div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Business Impact -->
-            <div class="card impact-card">
-                <div class="card-header">
-                    <h2>💰 BUSINESS IMPACT</h2>
-                    <span class="status-badge" id="impactStatus">PENDING</span>
-                </div>
-                <div class="card-body">
-                    <div class="impact-grid">
-                        <div class="impact-item">
-                            <div class="impact-label">Financial Loss/Min</div>
-                            <div class="impact-value financial" id="lossPerMinute">$0</div>
+                    <div class="hero-card accent">
+                        <span class="hero-card-label">EXPECTED OUTCOME</span>
+                        <div class="hero-card-value" id="expectedOutcome">Monitoring and analysis in progress.</div>
+                    </div>
+                    <div class="hero-card row">
+                        <div>
+                            <span class="hero-card-label">DAMAGE AVOIDED</span>
+                            <div class="hero-card-value" id="damageAvoided">$0</div>
                         </div>
-                        <div class="impact-item">
-                            <div class="impact-label">Transactions Blocked</div>
-                            <div class="impact-value" id="transactionsBlocked">0/hour</div>
+                        <div>
+                            <span class="hero-card-label">CONFIDENCE</span>
+                            <div class="hero-card-value" id="confidenceValue">0%</div>
                         </div>
-                        <div class="impact-item">
-                            <div class="impact-label">Customers Affected</div>
-                            <div class="impact-value" id="customersAffected">0</div>
-                        </div>
-                        <div class="impact-item">
-                            <div class="impact-label">Downtime Estimate</div>
-                            <div class="impact-value" id="downtimeEstimate">0 min</div>
+                        <div>
+                            <span class="hero-card-label">COUNCIL CONSENSUS</span>
+                            <div class="hero-card-value" id="consensusValue">0/8</div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Recommended Actions -->
-            <div class="card actions-card">
-                <div class="card-header">
-                    <h2>✅ RECOMMENDED ACTIONS</h2>
-                    <span class="priority-badge" id="actionsPriority">P0</span>
-                </div>
-                <div class="card-body">
-                    <div class="actions-list" id="actionsList">
-                        <div class="placeholder">Awaiting analysis completion...</div>
+            <div class="workspace-grid">
+                <aside class="council-panel">
+                    <div class="panel-heading">
+                        <div class="panel-title">AI Crisis Council</div>
+                        <p class="panel-copy">The council of directors is actively debating the recommendation and evidence stream.</p>
                     </div>
-                </div>
+                    <div class="council-tabs">
+                        <button class="tab-button active" data-tab="members">Members</button>
+                        <button class="tab-button" data-tab="debate">Debate</button>
+                    </div>
+                    <div class="council-list tab-content active" id="councilList">
+                        <div class="panel-empty">No council data yet.</div>
+                    </div>
+                    <div class="debate-stream tab-content" id="debateStream">
+                        <div class="panel-empty">Debate stream will appear here.</div>
+                    </div>
+                </aside>
+
+                <section class="decision-panel">
+                    <div class="panel-heading large">
+                        <div class="panel-title">Decision Engine</div>
+                        <p class="panel-copy">Future outcomes, risk trade-offs, and the recommended path are shown here as a single decision experience.</p>
+                    </div>
+                    <div class="outcome-grid" id="scenarioList">
+                        <div class="panel-empty">Awaiting scenario simulation.</div>
+                    </div>
+                </section>
+
+                <aside class="twin-panel">
+                    <div class="panel-heading">
+                        <div class="panel-title">Enterprise Digital Twin</div>
+                        <p class="panel-copy">Visualize how the incident propagates through identity, cloud, operations, finance, and customers.</p>
+                    </div>
+                    <div class="twin-canvas" id="twinCanvas">
+                        <svg class="twin-graph-svg" viewBox="0 0 480 400" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <filter id="node-shadow">
+                                    <feDropShadow dx="0" dy="0" stdDeviation="3" flood-opacity="0.5"/>
+                                </filter>
+                                <linearGradient id="edge-active" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#36d9ff;stop-opacity:0" />
+                                    <stop offset="50%" style="stop-color:#36d9ff;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#36d9ff;stop-opacity:0" />
+                                </linearGradient>
+                                <linearGradient id="edge-at-risk" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#ffb85c;stop-opacity:0" />
+                                    <stop offset="50%" style="stop-color:#ffb85c;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#ffb85c;stop-opacity:0" />
+                                </linearGradient>
+                                <linearGradient id="edge-critical" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#ff5f73;stop-opacity:0" />
+                                    <stop offset="50%" style="stop-color:#ff5f73;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#ff5f73;stop-opacity:0" />
+                                </linearGradient>
+                            </defs>
+                            
+                            <!-- Edges will be injected here by JavaScript -->
+                            <g class="edges-container" id="edgesContainer"></g>
+                            
+                            <!-- Nodes will be injected here by JavaScript -->
+                            <g class="nodes-container" id="nodesContainer"></g>
+                        </svg>
+                    </div>
+                </aside>
             </div>
 
-            <!-- System Status -->
-            <div class="card status-card">
-                <div class="card-header">
-                    <h2>🔍 SYSTEM STATUS</h2>
-                    <span class="status-badge active" id="systemStatus">OPERATIONAL</span>
-                </div>
-                <div class="card-body">
-                    <div class="status-grid">
-                        <div class="status-item">
-                            <div class="status-icon">⚡</div>
-                            <div class="status-info">
-                                <div class="status-label">Response Time</div>
-                                <div class="status-value" id="responseTime">0.0s</div>
-                            </div>
+            <section class="briefing-panel">
+                <div class="briefing-main">
+                    <div class="briefing-header">
+                        <div>
+                            <span class="eyebrow">EXECUTIVE BRIEFING</span>
+                            <h2 id="briefingHeadline">Awaiting first strategic recommendation.</h2>
                         </div>
-                        <div class="status-item">
-                            <div class="status-icon">🤖</div>
-                            <div class="status-info">
-                                <div class="status-label">AI Agents</div>
-                                <div class="status-value" id="agentsActive">0/4</div>
-                            </div>
+                        <button class="button" id="startWorkflow">LAUNCH CRISIS RESPONSE</button>
+                    </div>
+                    <div class="briefing-grid">
+                        <div>
+                            <div class="briefing-label">Current Situation</div>
+                            <div class="briefing-value" id="briefingSituation">No active crisis has been scored yet.</div>
                         </div>
-                        <div class="status-item">
-                            <div class="status-icon">📨</div>
-                            <div class="status-info">
-                                <div class="status-label">Messages</div>
-                                <div class="status-value" id="messagesProcessed">0</div>
-                            </div>
+                        <div>
+                            <div class="briefing-label">Recommended Action</div>
+                            <div class="briefing-value" id="briefingAction">No recommendation available.</div>
                         </div>
-                        <div class="status-item">
-                            <div class="status-icon">✅</div>
-                            <div class="status-info">
-                                <div class="status-label">Audit Trail</div>
-                                <div class="status-value" id="auditRecords">0</div>
-                            </div>
+                        <div>
+                            <div class="briefing-label">Expected Outcome</div>
+                            <div class="briefing-value" id="briefingOutcome">Awaiting analysis and council consensus.</div>
+                        </div>
+                        <div>
+                            <div class="briefing-label">Financial Exposure</div>
+                            <div class="briefing-value" id="briefingFinancial">$0 projected loss</div>
+                        </div>
+                        <div>
+                            <div class="briefing-label">Board Impact</div>
+                            <div class="briefing-value" id="briefingBoard">No board impact assessment available.</div>
+                        </div>
+                        <div>
+                            <div class="briefing-label">Regulatory Impact</div>
+                            <div class="briefing-value" id="briefingRegulatory">No regulatory assessment available.</div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Executive Report Preview -->
-            <div class="card report-card">
-                <div class="card-header">
-                    <h2>📋 EXECUTIVE BRIEFING</h2>
-                    <button class="btn-icon" id="downloadReport" title="Download Report">💾</button>
-                </div>
-                <div class="card-body">
-                    <div class="report-preview" id="reportPreview">
-                        <div class="placeholder">Executive report will be generated after analysis...</div>
+                <div class="oversight-panel">
+                    <div class="panel-heading">
+                        <div class="panel-title">AI Oversight Agent</div>
+                        <p class="panel-copy">Every recommendation is reviewed and verified before executive action.</p>
+                    </div>
+                    <div class="oversight-body">
+                        <div class="oversight-summary" id="oversightSummary">The AI oversight agent is assessing recommendation strength.</div>
+                        <div class="oversight-row">
+                            <span class="oversight-chip">Verdict</span>
+                            <span class="oversight-value" id="oversightVerdict">Pending review</span>
+                        </div>
+                        <div class="oversight-row">
+                            <span class="oversight-chip">Confidence</span>
+                            <span class="oversight-value" id="oversightConfidence">N/A</span>
+                        </div>
+                        <div class="oversight-flags" id="oversightFlags">
+                            <span class="flag">Awaiting evidence validation</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Compliance & Audit -->
-            <div class="card audit-card">
-                <div class="card-header">
-                    <h2>📝 COMPLIANCE & AUDIT</h2>
-                    <div class="audit-controls">
-                        <span class="record-count" id="recordCount">0 records</span>
-                        <button class="btn-icon" id="refreshAudit" title="Refresh">🔄</button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="audit-log" id="auditLog">
-                        <div class="placeholder">No audit records yet...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Control Panel -->
-        <div class="control-panel">
-            <button class="btn-primary" id="startWorkflow">
-                <span class="btn-icon">▶️</span>
-                <span class="btn-text">Start Crisis Simulation</span>
-            </button>
-            <button class="btn-secondary" id="resetDashboard">
-                <span class="btn-icon">🔄</span>
-                <span class="btn-text">Reset</span>
-            </button>
-            <div class="connection-status">
-                <span class="connection-dot" id="connectionDot"></span>
-                <span id="connectionText">Connecting...</span>
-            </div>
-        </div>
-    </main>
-
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Initializing CrisisOS...</div>
+            </section>
+        </main>
     </div>
 
+    <div class="toast-container" id="toastContainer"></div>
     <script src="/static/dashboard.js"></script>
 </body>
 </html>
