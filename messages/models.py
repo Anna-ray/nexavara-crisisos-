@@ -164,6 +164,119 @@ class PQCAuditRecord(BaseModel):
         return cls(**kwargs)
 
 
+class IncidentEvent(BaseModel):
+    id: str = Field(..., min_length=1, description="Unique incident identifier")
+    type: str = Field(..., min_length=1, description="Incident classification type")
+    severity: int = Field(..., ge=1, le=10, description="Severity rating from 1 to 10")
+    description: str = Field(..., min_length=1, description="Incident description")
+    timestamp: datetime = Field(..., description="Time when the incident was created")
+
+    model_config = {
+        "extra": "forbid"
+    }
+
+    @field_validator("id")
+    @classmethod
+    def validate_id(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("id must be a non-empty string")
+        return value
+
+
+class AgentRequest(BaseModel):
+    incident_id: str = Field(..., min_length=1, description="Identifier of the incident being requested")
+    context: Dict[str, Any] = Field(..., description="Current incident context for agent analysis")
+    agent_role: str = Field(..., min_length=1, description="Role of the agent receiving the request")
+
+    model_config = {
+        "extra": "forbid"
+    }
+
+    @field_validator("incident_id", "agent_role")
+    @classmethod
+    def validate_non_empty_string(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("value must be a non-empty string")
+        return value
+
+
+class AgentResponse(BaseModel):
+    agent_role: str = Field(..., min_length=1, description="Agent role generating the response")
+    analysis: str = Field(..., min_length=1, description="Structured analysis summary")
+    risk_score: int = Field(..., ge=0, le=100, description="Risk score from 0 to 100")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence level from 0.0 to 1.0")
+    recommended_actions: list[str] = Field(..., description="List of recommended actions from the agent")
+
+    model_config = {
+        "extra": "forbid"
+    }
+
+    @field_validator("agent_role", "analysis")
+    @classmethod
+    def validate_non_empty_string(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("value must be a non-empty string")
+        return value
+
+    @field_validator("recommended_actions")
+    @classmethod
+    def validate_recommended_actions(cls, value: list[str]) -> list[str]:
+        if not value:
+            raise ValueError("recommended_actions must contain at least one action")
+        return value
+
+
+class FinalDecision(BaseModel):
+    case_id: str = Field(..., min_length=1, description="Case/incident ID this decision applies to")
+    summary: str = Field(..., min_length=1, description="Executive summary of the final decision")
+    aggregated_risk: float = Field(..., ge=0.0, le=100.0, description="Aggregated risk score from all agent inputs")
+    final_action_plan: list[str] = Field(..., description="Final approved action plan items")
+    reasoning: str = Field(..., min_length=1, description="Executive reasoning behind the final decision")
+
+    model_config = {
+        "extra": "forbid"
+    }
+
+    @field_validator("summary", "reasoning")
+    @classmethod
+    def validate_non_empty_string(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("value must be a non-empty string")
+        return value
+
+    @field_validator("final_action_plan")
+    @classmethod
+    def validate_final_action_plan(cls, value: list[str]) -> list[str]:
+        if not value:
+            raise ValueError("final_action_plan must contain at least one action")
+        return value
+
+
+class AgentResponseEnvelope(BaseModel):
+    """Wrapper envelope for agent response events published on the event bus.
+    
+    Includes metadata (type, agent, case_id, timestamp, confidence) along with
+    the structured AgentResponse payload for audit and coordination purposes.
+    """
+    type: str = Field(..., description="Event type, always 'agent.response'")
+    agent: str = Field(..., min_length=1, description="Agent role that produced this response")
+    case_id: str = Field(..., min_length=1, description="Case/incident ID for this response")
+    timestamp: str = Field(..., description="ISO 8601 timestamp when the response was generated")
+    payload: AgentResponse = Field(..., description="The structured agent response payload")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Overall confidence level for the response")
+
+    model_config = {
+        "extra": "forbid"
+    }
+
+    @field_validator("type")
+    @classmethod
+    def validate_type(cls, value: str) -> str:
+        if value != "agent.response":
+            raise ValueError("type must be 'agent.response'")
+        return value
+
+
 # Topic -> payload model mapping used by the BandClient validator
 TOPIC_PAYLOAD_MODELS: Dict[str, type] = {
     # Customer support escalation topics
@@ -179,4 +292,8 @@ TOPIC_PAYLOAD_MODELS: Dict[str, type] = {
     "pqc.coordination.updated": PQCCoordinationState,
     "pqc.decision.made": PQCExecutiveDecision,
     "pqc.audit.recorded": PQCAuditRecord,
+    "incident.created": IncidentEvent,
+    "agent.request": AgentRequest,
+    "agent.response": AgentResponseEnvelope,
+    "final.decision": FinalDecision,
 }

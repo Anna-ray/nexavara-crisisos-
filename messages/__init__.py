@@ -1,6 +1,11 @@
 """Expose message models at package level."""
 
 from .models import (
+    AgentRequest,
+    AgentResponse,
+    AgentResponseEnvelope,
+    FinalDecision,
+    IncidentEvent,
     MessageEnvelope,
     EscalationCreated,
     EscalationTask,
@@ -11,6 +16,11 @@ from .models import (
 )
 
 __all__ = [
+    "AgentRequest",
+    "AgentResponse",
+    "AgentResponseEnvelope",
+    "FinalDecision",
+    "IncidentEvent",
     "MessageEnvelope",
     "EscalationCreated",
     "EscalationTask",

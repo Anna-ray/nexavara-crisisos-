@@ -323,13 +323,24 @@ Format your response as JSON with these exact keys: severity_level, root_cause, 
         # Severity assessment
         severity = "Level 3"
         financial_exposure = 50000.0
+        confidence_score = 0.6
         
-        if any(word in description_lower for word in ["critical", "emergency", "severe"]):
+        if any(word in description_lower for word in ["critical", "emergency", "severe", "ransomware", "breach", "attack"]):
             severity = "Level 5"
             financial_exposure = 150000.0
+            confidence_score = 0.95
         elif any(word in description_lower for word in ["high", "major", "significant"]):
             severity = "Level 4"
             financial_exposure = 100000.0
+            confidence_score = 0.85
+        
+        # Boost confidence if context provides severity > 7
+        if context:
+            context_severity = context.get("severity", 0)
+            if context_severity > 7:
+                confidence_score = min(0.99, confidence_score + 0.05)
+            elif context_severity >= 5:
+                confidence_score = min(0.95, confidence_score + 0.03)
         
         # Root cause detection
         root_cause = "Cryptographic anomaly detected"
@@ -357,7 +368,7 @@ Format your response as JSON with these exact keys: severity_level, root_cause, 
                 "Notify security team",
                 "Monitor system metrics"
             ],
-            "confidence_score": 0.6,
+            "confidence_score": confidence_score,
             "ai_source": "heuristic",
             "raw_response": "Heuristic analysis based on keyword matching"
         }
