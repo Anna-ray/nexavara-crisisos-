@@ -65,13 +65,20 @@ class FinanceAgent(AIEnhancedAgent):
         total_cost = downtime_cost + recovery_cost
         
         # AI-informed risk assessment
-        base_risk = int(ai_analysis.get("severity_level", "Level 3").split()[-1]) * 15
+        ai_level = int(ai_analysis.get("severity_level", "Level 3").split()[-1])
+        blended_level = (ai_level + (severity / 2)) / 2
+        base_risk = int(blended_level * 15)
         if total_cost > 1000000:
             risk_score = min(100, base_risk + 25)
         elif total_cost > 500000:
             risk_score = min(100, base_risk + 15)
         else:
             risk_score = base_risk
+
+        if severity < 5:
+            risk_score = min(risk_score, 49)
+        elif severity >= 8:
+            risk_score = max(risk_score, 65)
         
         confidence = ai_analysis.get("confidence_score", 0.8)
         
