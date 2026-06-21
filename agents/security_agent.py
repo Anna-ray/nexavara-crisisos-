@@ -39,10 +39,11 @@ class SecurityAgent(AIEnhancedAgent):
         combined_severity = (ai_level + (severity / 2)) / 2
         base_score = int(combined_severity * 17)  # Scale to 0-100
         confidence = ai_analysis.get("confidence_score", 0.75)
+        severity_label = "CRITICAL" if severity >= 8 else ("MEDIUM" if severity >= 5 else "LOW")
         
         # Build AI-informed analysis
         analysis = (
-            f"SECURITY ASSESSMENT (AI-Enhanced): {incident_type.capitalize()} incident. "
+            f"SECURITY ASSESSMENT (AI-Enhanced) [{severity_label}]: {incident_type.capitalize()} incident. "
             f"Root cause hypothesis: {ai_analysis.get('root_cause', 'Analysis pending')}. "
             f"Recommended immediate actions: {', '.join(ai_analysis.get('recommended_actions', [])[:2])}"
         )
