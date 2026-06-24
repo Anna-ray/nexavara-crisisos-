@@ -125,7 +125,7 @@ class ExecutiveAgent(BaseAgent):
         )
         
         reasoning = (
-            f"Analysis from {len(agent_responses)} specialized agents. "
+            f"Executive analysis from {len(agent_responses)} specialized agents. "
             f"Risk factors: {', '.join([resp.agent_role for resp in agent_responses])}. "
             f"Highest risk score: {max(risk_scores)}. "
             f"Average confidence: {sum(confidences) / len(confidences):.2f}. "

@@ -71,7 +71,7 @@ class LegalAgent(AIEnhancedAgent):
             ] + base_actions
         else:
             analysis = (
-                f"LEGAL REVIEW REQUIRED: Apply incident response standards. "
+                f"STANDARD LEGAL REVIEW REQUIRED: Apply incident response standards. "
                 f"AI-assisted assessment: {ai_analysis.get('root_cause', 'Analysis in progress')}. "
                 f"Assess contractual obligations with customers and partners."
             )

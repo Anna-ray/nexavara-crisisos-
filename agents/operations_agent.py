@@ -50,10 +50,11 @@ class OperationsAgent(AIEnhancedAgent):
         critical_multiplier = 1.0 + (critical_count * 0.25)
         risk_score = min(100, int(base_risk * critical_multiplier))
         confidence = ai_analysis.get("confidence_score", 0.75)
+        severity_label = "CRITICAL" if severity >= 8 else ("HIGH" if severity >= 6 else "STANDARD")
         
         # AI-enhanced analysis text
         analysis = (
-            f"OPERATIONAL IMPACT ANALYSIS (AI-Enhanced): {incident_type} incident. "
+            f"OPERATIONAL IMPACT ANALYSIS (AI-Enhanced) [{severity_label}]: {incident_type} incident. "
             f"Affected systems: {', '.join(affected_systems or ['TBD'])}. "
             f"AI-projected recovery strategy: {ai_analysis.get('recommended_actions', ['See AI output'])[0]}"
         )
