@@ -14,6 +14,8 @@ const state = {
     oversight: {},
     briefing: {}
 };
+const START_WORKFLOW_LABEL = 'LAUNCH CRISIS RESPONSE';
+let workflowActive = false;
 
 function $(id) {
     return document.getElementById(id);
@@ -33,9 +35,14 @@ function init() {
     socket.on('workflow_status', handleWorkflowStatus);
 
     $('startWorkflow').addEventListener('click', () => {
+        if (!$('workflowConsent').checked) {
+            showToast('Please provide consent before launching the workflow.', 'warning');
+            return;
+        }
         socket.emit('start_workflow');
         setButtonLoading(true);
     });
+    $('workflowConsent').addEventListener('change', updateStartButtonAvailability);
 
     // Setup tab switching
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -47,6 +54,7 @@ function init() {
     });
 
     updateConnection(false);
+    updateStartButtonAvailability();
 }
 
 function handleConnect() {
@@ -78,7 +86,8 @@ function switchTab(tabName) {
     }
 }
 
-
+function handleStateUpdate(payload) {
+    if (!payload) return;
     if (payload.command) handleCommandUpdate(payload.command);
     if (payload.council) handleCouncilUpdate(payload.council);
     if (payload.outcomes) handleOutcomesUpdate(payload.outcomes);
@@ -384,10 +393,18 @@ function updateConnection(connected) {
 }
 
 function setButtonLoading(active) {
+    workflowActive = active;
     const button = $('startWorkflow');
-    button.disabled = active;
     button.classList.toggle('button-loading', active);
-    button.textContent = active ? 'PROCESSING…' : 'LAUNCH CRISIS RESPONSE';
+    button.textContent = active ? 'PROCESSING…' : START_WORKFLOW_LABEL;
+    updateStartButtonAvailability();
+}
+
+function updateStartButtonAvailability() {
+    const button = $('startWorkflow');
+    const consent = $('workflowConsent');
+    if (!button || !consent) return;
+    button.disabled = workflowActive || !consent.checked;
 }
 
 function showToast(message, type = 'info') {

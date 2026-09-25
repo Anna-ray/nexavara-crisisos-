@@ -187,7 +187,13 @@
                             <span class="eyebrow">EXECUTIVE BRIEFING</span>
                             <h2 id="briefingHeadline">Awaiting first strategic recommendation.</h2>
                         </div>
-                        <button class="button" id="startWorkflow">LAUNCH CRISIS RESPONSE</button>
+                        <div class="briefing-actions">
+                            <label class="consent-toggle" for="workflowConsent">
+                                <input type="checkbox" id="workflowConsent" />
+                                <span>I authorize launching this crisis response workflow.</span>
+                            </label>
+                            <button class="button" id="startWorkflow" disabled>LAUNCH CRISIS RESPONSE</button>
+                        </div>
                     </div>
                     <div class="briefing-grid">
                         <div>

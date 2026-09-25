@@ -476,6 +476,26 @@ button, input, textarea {
     margin-bottom: 24px;
 }
 
+.briefing-actions {
+    display: grid;
+    gap: 12px;
+    justify-items: end;
+}
+
+.consent-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    max-width: 320px;
+    line-height: 1.4;
+}
+
+.consent-toggle input {
+    margin-top: 2px;
+}
+
 .button {
     padding: 18px 26px;
     border-radius: 999px;
@@ -489,6 +509,11 @@ button, input, textarea {
 
 .button-loading {
     opacity: 0.85;
+}
+
+.button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }
 
 .briefing-grid {
@@ -1020,5 +1045,11 @@ button, input, textarea {
     }
     .hero-card.row {
         grid-template-columns: 1fr;
+    }
+    .briefing-actions {
+        justify-items: stretch;
+    }
+    .consent-toggle {
+        max-width: none;
     }
 }
